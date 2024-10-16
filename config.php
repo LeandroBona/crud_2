@@ -1,21 +1,26 @@
 <?php
-include 'config.php';
+// Conexão com o MySQL
+$host = 'localhost';
+$user = 'root';
+$password = 'root';
+$databaseFile = 'database.sql';
 
-if($_SERVER["REQUEST_METHOD"]=="POST"){
-    $nome = $_POST["nome"];
-    $email = $_POST["email"];
-    $telefone = $_POST["telefone"];
+try {
+    $pdo = new PDO("mysql:host=$host", $user, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // inserindo na tabela
-    $sql = "INSERT INTO pessoas (nome, email, telefone) VALUES ('$nome', '$email','$telefone')";
-
-    if($conn->query($sql) === true){
-        header("Location: index.php"); //redireciona para a o index se der tudo certo
-        exit();
-    }else{
-        echo "Erro: " . $sql . "<br>"; //retorna erro
+    // Ler o conteúdo do arquivo SQL
+    $sql = file_get_contents($databaseFile);
+    if ($sql === false) {
+        throw new Exception("Não foi possível ler o arquivo SQL");
     }
-}
 
-$conn->close();
+    // Executar o script SQL
+    $pdo->exec($sql);
+    echo "Banco de dados criado ou atualizado com sucesso!";
+} catch (PDOException $e) {
+    echo "Erro na conexão: " . $e->getMessage();
+} catch (Exception $e) {
+    echo "Erro: " . $e->getMessage();
+}
 ?>
